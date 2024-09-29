@@ -10,7 +10,7 @@ byte ledState = LOW;
 unsigned long debounceDuration = 50;
 unsigned long lastTimeButtonStateChanged = 0;
 const char* ssid = "House_1";
-const char* password = "euvejotudo";
+const char* password = "xxxx";
 String Device_1_Name = "Luz Quarto";
 boolean wifiConnected = false;
 
