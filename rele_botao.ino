@@ -9,7 +9,7 @@ byte lastButtonState = HIGH;
 byte ledState = LOW;
 unsigned long debounceDuration = 50;
 unsigned long lastTimeButtonStateChanged = 0;
-const char* ssid = "House_1";
+const char* ssid = "xxxxx";
 const char* password = "xxxx";
 String Device_1_Name = "Luz Quarto";
 boolean wifiConnected = false;
@@ -73,7 +73,6 @@ boolean connectWifi(){
 }
 
 void addDevices(){
-  Serial.println("addDevices");
   d = new EspalexaDevice(Device_1_Name, firstSwitchChanged);
   espalexa.addDevice(d);
   espalexa.begin();
@@ -83,7 +82,7 @@ void setup() {
   Serial.begin(115200);
   pinMode(LED_PIN1, OUTPUT);
   pinMode(LED_PIN2, OUTPUT);
-  pinMode(BUTTON_PIN, INPUT_PULLUP);
+  pinMode(BUTTON_PIN, INPUT);
 
     wifiConnected = connectWifi();
 
@@ -97,8 +96,10 @@ void setup() {
 }
 
 void loop() {
-
-    espalexa.loop();
+  
+  if(wifiConnected){
+      espalexa.loop(); 
+    }
     
   if (millis() - lastTimeButtonStateChanged > debounceDuration) {
     byte buttonState = digitalRead(BUTTON_PIN);
@@ -112,9 +113,14 @@ void loop() {
         digitalWrite(LED_PIN2, ledState);
         
         if(ledState == HIGH){
-            d->setValue(0);
+            if(wifiConnected){
+                d->setValue(0);
+              }
+            
           }else{
-            d->setValue(255);
+            if(wifiConnected){
+                d->setValue(255);  
+              }
           }
       }
     }
