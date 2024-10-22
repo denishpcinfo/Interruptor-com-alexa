@@ -9,10 +9,13 @@ byte lastButtonState = HIGH;
 byte ledState = LOW;
 unsigned long debounceDuration = 50;
 unsigned long lastTimeButtonStateChanged = 0;
-const char* ssid = "xxxxx";
-const char* password = "xxxx";
+const char* ssid = "xxx";
+const char* password = "xxx";
 String Device_1_Name = "Luz Quarto";
 boolean wifiConnected = false;
+boolean naoconectar = false;
+
+WiFiEventHandler wifiConnectHandler;
 
 void firstSwitchChanged(uint8_t brightness);
 
@@ -43,7 +46,6 @@ boolean connectWifi(){
 
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
-  Serial.println("");
   Serial.println("Conectando WiFi");
   Serial.print("Conectando...");
   while (WiFi.status() != WL_CONNECTED) {
@@ -53,9 +55,8 @@ boolean connectWifi(){
       state = false; break;
     }
     i++;
-  }-
-
-  Serial.println("");
+  }
+  
   if (state) {
     Serial.print("Conectado a ");
     Serial.println(ssid);
@@ -78,13 +79,32 @@ void addDevices(){
   espalexa.begin();
 }
 
+void onWifiConnect(const WiFiEventStationModeGotIP& event) {      
+    if(!naoconectar){
+          WiFi.begin(ssid, password);
+          naoconectar = true;
+           espalexa.loop(); 
+            uint8_t bri = d->getValue();
+            
+              if(ledState == HIGH){
+            if(wifiConnected){
+                d->setValue(0);
+              }
+          }else{
+            if(wifiConnected){
+                d->setValue(255);  
+              }
+          }
+      }
+}
+
 void setup() {
   Serial.begin(115200);
   pinMode(LED_PIN1, OUTPUT);
   pinMode(LED_PIN2, OUTPUT);
   pinMode(BUTTON_PIN, INPUT);
-
-    wifiConnected = connectWifi();
+  
+  wifiConnected = connectWifi();
 
   if (wifiConnected){
     addDevices();
@@ -93,7 +113,11 @@ void setup() {
     Serial.println("Não é possível conectar ao WiFi!");
     delay(1000);
   }
+  
+  wifiConnectHandler = WiFi.onStationModeGotIP(onWifiConnect);
+    
 }
+
 
 void loop() {
   
